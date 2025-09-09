@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>เกมจับคู่ฟิสิกส์ </title>
+<style>
+  body{font-family:"Kanit",sans-serif;background:#f0f8ff;padding:20px;text-align:center}
+  h1{margin-bottom:10px}
+  #gameBoard{display:grid;grid-template-columns:repeat(4,120px);gap:12px;justify-content:center;margin-top:20px}
+  .card{width:120px;height:80px;perspective:800px;cursor:pointer}
+  .inner{position:relative;width:100%;height:100%;transition:transform 0.6s;transform-style:preserve-3d}
+  .flipped{transform:rotateY(180deg)}
+  .front,.back{position:absolute;width:100%;height:100%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px}
+  .front{background:#0a84ff;color:#fff;backface-visibility:hidden}
+  .back{background:#fff;border:2px solid #0a84ff;color:#222;transform:rotateY(180deg);backface-visibility:hidden;padding:6px}
+  #result{margin-top:20px;font-size:18px;font-weight:bold}
+</style>
+</head>
+<body>
+  <h1>เกมจับคู่ฟิสิกส์ 🧪</h1>
+  <p>เปิดการ์ด 2 ใบเพื่อหาคู่ที่ตรงกัน</p>
+  <div id="gameBoard"></div>
+  <div id="result"></div>
+
+<script>
+const data=[
+  {q:"เอกซะ",a:"10¹⁸"},
+  {q:"เพตะ",a:"10¹⁵"},
+  {q:"เทระ",a:"10¹²"},
+  {q:"กิกะ ",a:"10⁹"},
+  {q:"เมกะ",a:"10⁶"},
+  {q:"กิโล",a:"10³"},
+  {q:"เฮกโต",a:"10²"},
+  {q:"เดคา ",a:"10¹"},
+   {q:"เซนติ  ",a:"10⁻²"},
+    {q:"มิลลิ",a:"10⁻³"},
+     {q:"ไมโคร  ",a:"10⁻⁶"},
+       {q:"นาโน  ",a:"10⁻⁹"},
+         {q:"พิโก  ",a:"10⁻¹²"},
+         {q:"เดซิ ",a:"10⁻¹"},
+
+];
+
+// เตรียมคู่การ์ด
+let cards=[];
+data.forEach((item,i)=>{
+  cards.push({id:i,type:"q",text:item.q});
+  cards.push({id:i,type:"a",text:item.a});
+});
+
+// สุ่มสับการ์ด
+cards=cards.sort(()=>Math.random()-0.5);
+
+const board=document.getElementById("gameBoard");
+cards.forEach((c,i)=>{
+  const card=document.createElement("div");
+  card.className="card";
+  card.innerHTML=`
+    <div class="inner">
+      <div class="front">?</div>
+      <div class="back">${c.text}</div>
+    </div>`;
+  card.dataset.id=c.id;
+  card.dataset.type=c.type;
+  board.appendChild(card);
+});
+
+let flipped=[];
+let lock=false;
+let matched=0;
+
+function checkMatch(){
+  const [c1,c2]=flipped;
+  if(c1.dataset.id===c2.dataset.id && c1.dataset.type!==c2.dataset.type){
+    matched++;
+    flipped=[];
+    if(matched===data.length){
+      document.getElementById("result").textContent="🎉 คุณจับคู่ครบทั้งหมดแล้ว!";
+    }
+  }else{
+    lock=true;
+    setTimeout(()=>{
+      c1.querySelector(".inner").classList.remove("flipped");
+      c2.querySelector(".inner").classList.remove("flipped");
+      flipped=[];
+      lock=false;
+    },800);
+  }
+}
+
+document.querySelectorAll(".card").forEach(card=>{
+  card.addEventListener("click",()=>{
+    if(lock) return;
+    const inner=card.querySelector(".inner");
+    if(inner.classList.contains("flipped")) return;
+    inner.classList.add("flipped");
+    flipped.push(card);
+    if(flipped.length===2) checkMatch();
+  });
+});
+</script>
+</body>
+</html>
